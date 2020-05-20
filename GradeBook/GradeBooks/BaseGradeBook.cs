@@ -14,10 +14,12 @@ namespace GradeBook.GradeBooks
         public string Name { get; set; }
         public List<Student> Students { get; set; }
         public GradeBookType Type { get; set; }
+        public bool IsWeighted { get; set; }
 
-        public BaseGradeBook(string name)
+        public BaseGradeBook(string name, bool isWeighted)
         {
             Name = name;
+            IsWeighted = isWeighted;
             Students = new List<Student>();
         }
 
@@ -107,20 +109,36 @@ namespace GradeBook.GradeBooks
 
         public virtual double GetGPA(char letterGrade, StudentType studentType)
         {
+            double gradePointAverage = 0;
+
             switch (letterGrade)
             {
                 case 'A':
-                    return 4;
+                    gradePointAverage = 4;
+                    break;
                 case 'B':
-                    return 3;
+                    gradePointAverage = 3;
+                    break;
                 case 'C':
-                    return 2;
+                    gradePointAverage = 2;
+                    break;
                 case 'D':
-                    return 1;
+                    gradePointAverage = 1;
+                    break;
                 case 'F':
-                    return 0;
+                    gradePointAverage = 0;
+                    break;
             }
-            return 0;
+
+            if (IsWeighted)
+            {
+                if (studentType == StudentType.Honors || studentType == StudentType.DualEnrolled)
+                {
+                    gradePointAverage++;
+                }
+            }
+
+            return gradePointAverage;
         }
 
         public virtual void CalculateStatistics()
@@ -264,7 +282,7 @@ namespace GradeBook.GradeBooks
                              from type in assembly.GetTypes()
                              where type.FullName == "GradeBook.GradeBooks.StandardGradeBook"
                              select type).FirstOrDefault();
-            
+
             return JsonConvert.DeserializeObject(json, gradebook);
         }
     }
